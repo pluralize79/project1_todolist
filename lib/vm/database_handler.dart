@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'package:project1_todolist/model/categorys.dart';
+import 'package:project1_todolist/model/work.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHandler {
@@ -31,7 +34,7 @@ class DatabaseHandler {
         );
         await db.execute(
           """
-          create table category
+          create table categorys
           (
             seq integer primary key autoincrement,
             title text,
@@ -67,6 +70,7 @@ class DatabaseHandler {
           create table settings
           (
             themecolor integer
+            darkmode integer
           )
           """
         );
@@ -84,4 +88,46 @@ class DatabaseHandler {
       version: 1
     );
   }
+
+  //Add 
+  Future<int> addWork(Work work) async{
+    int result = 0;
+    final Database db = await initializeDB();
+    result = await db.rawInsert(
+      """
+        insert into work
+        (category_seq, place_seq, checkdate, content, duedate, duetime, memo, image)
+        values
+        (?, ?, ?, ?, ?, ?, ?, ?)
+      """,
+      [
+        work.category_seq,
+        work.place_seq,
+        work.checkdate,
+        work.content,
+        work.duedate,
+        work.duetime,
+        work.memo,
+        work.image
+      ]
+    );
+    return result;
+  }
+  
+  Future<int> addCategorys(Categorys categorys) async{
+    int result = 0;
+    final Database db = await initializeDB();
+    result = await db.rawInsert(
+      """
+        insert into categorys
+        (title, customorder)
+        values
+        (?, select ifnull(max(customorder), 0) + 1 from category)
+      """,
+      [categorys.title]
+    );
+    return result;
+  }
+
+
 }
