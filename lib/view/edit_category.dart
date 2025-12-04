@@ -144,6 +144,7 @@ class _EditCategoryState extends State<EditCategory> {
     if(result == 0){
       MySnackbar.error('오류가 발생했습니다.');
     }
+    titleController.text = "";
     Get.back();
     setState(() {});
    }
