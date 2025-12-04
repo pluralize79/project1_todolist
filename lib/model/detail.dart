@@ -1,7 +1,7 @@
 class Detail {
   int? seq;
   int work_seq;
-  int check;
+  int checked;
   String content;
   int customorder;
 
@@ -9,7 +9,7 @@ class Detail {
     {
       this.seq,
       required this.work_seq,
-      required this.check,
+      required this.checked,
       required this.content,
       required this.customorder
     }
@@ -18,7 +18,7 @@ class Detail {
   Detail.fromMap(Map<String, dynamic> res)
   : seq = res['seq'],
     work_seq = res['work_seq'],
-    check = res['check'],
+    checked = res['checked'],
     content = res['content'],
     customorder = res['customorder'];
     

@@ -11,6 +11,9 @@ class Work {
   String duetime;
   String memo;
   Uint8List image;
+  int customorder;
+  int mark;
+  String initdate;
 
   Work(
     {
@@ -22,7 +25,10 @@ class Work {
       required this.duedate,
       required this.duetime,
       required this.memo,
-      required this.image
+      required this.image,
+      required this.customorder,
+      required this.mark,
+      required this.initdate
     }
   );
 
@@ -35,6 +41,9 @@ class Work {
     duedate = res['duedate'],
     duetime = res['duetime'],
     memo = res['memo'],
-    image = res['image'];
+    image = res['image'],
+    customorder = res['customorder'],
+    mark = res['mark'],
+    initdate = res['initdate'];
 
 }

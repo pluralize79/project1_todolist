@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:project1_todolist/model/categorys.dart';
 import 'package:project1_todolist/model/work.dart';
@@ -48,7 +47,7 @@ class DatabaseHandler {
           (
             seq integer primary key autoincrement,
             work_seq integer,
-            check integer,
+            checked integer,
             content text,
             customorder integer
           )
@@ -69,7 +68,7 @@ class DatabaseHandler {
           """
           create table settings
           (
-            themecolor integer
+            themecolor integer,
             darkmode integer
           )
           """
@@ -89,16 +88,167 @@ class DatabaseHandler {
     );
   }
 
-  //Add 
+  //카테고리 리스트
+  Future<List<Categorys>> listCategorys() async{
+    final Database db = await initializeDB();
+    final List<Map<String, Object?>> queryResult = await db.rawQuery(
+      """
+      select * from categorys
+      order by customorder
+      """
+    );
+    return queryResult.map((e) => Categorys.fromMap(e)).toList();
+  }
+
+  //카테고리 기본 데이터 추가 (데이터 없을 때만)
+  Future<int> addDefaultCategorys() async{
+    int result = 0;
+    final Database db = await initializeDB();
+    final List<Map<String, Object?>> queryResult = await db.rawQuery(
+      "select * from categorys"
+    );
+    if(queryResult.isNotEmpty){ //이미 카테고리가 있으면 삽입 없이 1 반환
+      return 1;
+    }else{
+      //다음 customorder값 확인
+      var maxOrderResult = await db.rawQuery(
+        "select ifnull(max(customorder), 0) + 1 as next from categorys"
+      );
+      var nextOrder = maxOrderResult.first['next'];
+      //기본 카테고리(작업) 삽입
+      result = await db.rawInsert(
+        """
+          insert into categorys
+          (title, customorder)
+          values
+          (?, ?)
+        """,
+        ['작업',nextOrder]
+      );
+      if(result == 0) return 0;
+
+      //다음 customorder값 확인
+      maxOrderResult = await db.rawQuery(
+        "select ifnull(max(customorder), 0) + 1 as next from categorys"
+      );
+      nextOrder = maxOrderResult.first['next'];
+      //기본 카테고리(약속) 삽입
+      result = await db.rawInsert(
+        """
+          insert into categorys
+          (title, customorder)
+          values
+          (?, ?)
+        """,
+        ['약속',nextOrder]
+      );
+      if(result == 0) return 0;
+
+      //기본 카테고리(기념일) 삽입
+      maxOrderResult = await db.rawQuery(
+        "select ifnull(max(customorder), 0) + 1 as next from categorys"
+      );
+      nextOrder = maxOrderResult.first['next'];
+      //
+      result = await db.rawInsert(
+        """
+          insert into categorys
+          (title, customorder)
+          values
+          (?, ?)
+        """,
+        ['기념일',nextOrder]
+      );
+      return result;
+    }
+  }
+
+  //카테고리 순서 바꾸기
+  Future<void> updateCategoryOrder(List<Categorys> list) async {
+    final Database db = await initializeDB();
+    for (int i = 0; i < list.length; i++) {
+      await db.rawUpdate(
+        '''
+        update categorys
+        set customorder = ?
+        where seq = ?
+        ''',
+        [i, list[i].seq],
+      );
+    }
+  }
+
+  //카테고리 추가
+  Future<int> addCategorys(Categorys categorys) async{
+    int result = 0;
+    final Database db = await initializeDB();
+    //다음 customorder값 확인
+      var maxOrderResult = await db.rawQuery(
+        "select ifnull(max(customorder), 0) + 1 as next from categorys"
+      );
+      var nextOrder = maxOrderResult.first['next'];
+    result = await db.rawInsert(
+      """
+        insert into categorys
+        (title, customorder)
+        values
+        (?, ?)
+      """,
+      [categorys.title, nextOrder]
+    );
+    return result;
+  }
+
+  //카테고리 삭제
+  Future<void> deleteCategorys(Categorys categorys) async{
+    final Database db = await initializeDB();
+    await db.rawUpdate(
+    """
+      delete from categorys
+      where seq = ?
+    """,
+    [categorys.seq]
+    );
+    await db.rawUpdate(
+      '''
+      update categorys
+      set customorder = customorder - 1
+      where customorder > ?
+      ''',
+      [categorys.customorder],
+    );
+  }
+
+  //카테고리 시퀀스 확인
+  Future<int> seqCategorys(int index) async{
+    final Database db = await initializeDB();
+    final List<Map<String, Object?>> queryResult = await db.rawQuery(
+      """
+      select seq from categorys
+      where customorder = ?
+      """,
+      [index]
+    );
+    print(queryResult[0]['seq']);
+    return int.parse('${queryResult[0]['seq']}');
+  }
+
+
+  // 작업 추가
   Future<int> addWork(Work work) async{
     int result = 0;
     final Database db = await initializeDB();
+    //다음 customorder값 확인
+      var maxOrderResult = await db.rawQuery(
+        "select ifnull(max(customorder), 0) + 1 as next from work"
+      );
+      var nextOrder = maxOrderResult.first['next'];
     result = await db.rawInsert(
       """
         insert into work
-        (category_seq, place_seq, checkdate, content, duedate, duetime, memo, image)
+        (category_seq, place_seq, checkdate, content, duedate, duetime, memo, image, customorder, mark, initdate)
         values
-        (?, ?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, date('now'))
       """,
       [
         work.category_seq,
@@ -108,26 +258,12 @@ class DatabaseHandler {
         work.duedate,
         work.duetime,
         work.memo,
-        work.image
+        work.image,
+        nextOrder,
+        work.mark,
       ]
     );
     return result;
   }
-  
-  Future<int> addCategorys(Categorys categorys) async{
-    int result = 0;
-    final Database db = await initializeDB();
-    result = await db.rawInsert(
-      """
-        insert into categorys
-        (title, customorder)
-        values
-        (?, select ifnull(max(customorder), 0) + 1 from category)
-      """,
-      [categorys.title]
-    );
-    return result;
-  }
-
 
 }
