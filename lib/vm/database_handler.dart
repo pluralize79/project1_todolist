@@ -199,6 +199,21 @@ class DatabaseHandler {
     return result;
   }
 
+  //카테고리 수정
+  Future<int> updateCategorys(Categorys categorys) async{
+    final Database db = await initializeDB();
+    int result = 0;
+    result = await db.rawUpdate(
+      """
+      update categorys
+      set title = ?
+      where seq = ?
+      """,
+      [categorys.title, categorys.seq]
+    );
+    return result;
+  }
+
   //카테고리 삭제
   Future<void> deleteCategorys(Categorys categorys) async{
     final Database db = await initializeDB();
@@ -217,20 +232,6 @@ class DatabaseHandler {
       ''',
       [categorys.customorder],
     );
-  }
-
-  //카테고리 시퀀스 확인
-  Future<int> seqCategorys(int index) async{
-    final Database db = await initializeDB();
-    final List<Map<String, Object?>> queryResult = await db.rawQuery(
-      """
-      select seq from categorys
-      where customorder = ?
-      """,
-      [index]
-    );
-    print(queryResult[0]['seq']);
-    return int.parse('${queryResult[0]['seq']}');
   }
 
 

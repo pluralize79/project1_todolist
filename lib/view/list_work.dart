@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project1_todolist/view/add_work.dart';
 import 'package:project1_todolist/view/edit_category.dart';
 import 'package:project1_todolist/vm/database_handler.dart';
 
@@ -45,35 +46,44 @@ class _ListWorkState extends State<ListWork> with SingleTickerProviderStateMixin
           )
         ],
       ),
-      body: FutureBuilder(
-        future: handler.listCategorys(), 
-        builder: (context, snapshot) {
-          return snapshot.hasData && snapshot.data!.isNotEmpty
-          ? SizedBox(
-            height: 30,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: FutureBuilder(
+          future: handler.listCategorys(), 
+          builder: (context, snapshot) {
+            return snapshot.hasData && snapshot.data!.isNotEmpty
+            ? SizedBox(
+              height: 30,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      onPressed: () {
+        
+                      },
+                      child: Text(snapshot.data![index].title),
                     ),
-                    onPressed: () {
-
-                    },
-                    child: Text(snapshot.data![index].title),
-                  ),
-                );
-              },
-            ),
-          )
-          : Center(
-            child: CircularProgressIndicator(),
-          );
-        },
+                  );
+                },
+              ),
+            )
+            : Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: ColorScheme.of(context).primary,
+        foregroundColor: ColorScheme.of(context).onPrimary,
+        onPressed: () => Get.to(AddWork()),
+        child: Icon(Icons.add_rounded),
       ),
     );
   } // build

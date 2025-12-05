@@ -44,12 +44,26 @@ class _EditCategoryState extends State<EditCategory> {
                   motion: BehindMotion(), 
                   children: [
                     SlidableAction(
+                      backgroundColor: ColorScheme.of(context).secondary,
+                      foregroundColor: ColorScheme.of(context).onSecondary,
+                      label: '수정',
+                      onPressed: (context) async{
+                        titleController.text = snapshot.data![index].title;
+                        if (item.seq == 1){ //기본 카테고리인지 확인 후 수정 막기
+                          MySnackbar.error('경고','기본 카테고리는 수정할 수 없습니다.');
+                        }else{
+                          Categorys categorys = snapshot.data![index];
+                          updatePopup(categorys);
+                        }
+                      },
+                    ),
+                    SlidableAction(
                       backgroundColor: ColorScheme.of(context).error,
+                      foregroundColor: ColorScheme.of(context).onError,
                       label: '삭제',
                       onPressed: (context) async{
-                        int nowSeq = await handler.seqCategorys(index);
-                        if (nowSeq == 1){
-                          MySnackbar.error('기본 카테고리는 삭제할 수 없습니다.');
+                        if (item.seq == 1){ //기본 카테고리인지 확인 후 삭제 막기
+                          MySnackbar.error('경고','기본 카테고리는 삭제할 수 없습니다.');
                         }else{
                           await handler.deleteCategorys(snapshot.data![index]);
                           setState(() {});
@@ -61,16 +75,13 @@ class _EditCategoryState extends State<EditCategory> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: ColorScheme.of(context).secondaryContainer,
-                    border: Border(
-                      bottom: BorderSide(color: ColorScheme.of(context).secondary, width: 2),
-                    ),
                   ),
                   height: 50,
                   child: Stack(
                     children: [
                       Center(
                         child: Text(
-                          snapshot.data![index].title
+                          snapshot.data![index].title 
                         )
                       ),
                       Positioned.fill(
@@ -105,11 +116,46 @@ class _EditCategoryState extends State<EditCategory> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: ColorScheme.of(context).primary,
+        foregroundColor: ColorScheme.of(context).onPrimary,
         onPressed: () => insertPopup(),
         child: Icon(Icons.add_rounded),
       ),
     );
   } // build
+
+  //카테고리 수정 팝업
+  updatePopup(Categorys categorys){
+    Get.dialog(
+     AlertDialog(
+      title: Text('카테고리 수정'),
+      actions: [
+        Column(
+          children: [
+            TextField(
+              controller: titleController,
+            ),
+            TextButton(
+              onPressed: () => updateAction(categorys), 
+              child: Text('수정하기')
+            )
+          ],
+        )
+      ],
+     )
+    );
+  }
+
+  //카테고리 수정 액션
+  updateAction(Categorys categorys) async{
+    categorys.title = titleController.text;
+    int result = await handler.updateCategorys(categorys);
+    result == 0 
+    ? MySnackbar.error('오류', '오류가 발생했습니다.') 
+    : setState(() {});
+    titleController.text = '';
+    Get.back();
+  }
 
   //카테고리 추가 팝업
   insertPopup(){
@@ -121,6 +167,8 @@ class _EditCategoryState extends State<EditCategory> {
           children: [
             TextField(
               controller: titleController,
+              maxLines: 1,
+              maxLength: 10,
             ),
             TextButton(
               onPressed: () => insertAction(), 
@@ -142,7 +190,7 @@ class _EditCategoryState extends State<EditCategory> {
     int result = 0;
     result = await handler.addCategorys(categorys);
     if(result == 0){
-      MySnackbar.error('오류가 발생했습니다.');
+      MySnackbar.error('오류','오류가 발생했습니다.');
     }
     titleController.text = "";
     Get.back();

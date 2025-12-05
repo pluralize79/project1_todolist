@@ -4,31 +4,31 @@ import 'package:flutter/foundation.dart';
 class Work {
   int? seq;
   int category_seq;
-  int place_seq;
-  String checkdate;
+  int? place_seq;
+  String? checkdate;
   String content;
   String duedate;
-  String duetime;
-  String memo;
-  Uint8List image;
-  int customorder;
-  int mark;
-  String initdate;
+  String? duetime;
+  String? memo;
+  Uint8List? image;
+  int? customorder;
+  int? mark;
+  String? initdate;
 
   Work(
     {
       this.seq,
       required this.category_seq,
-      required this.place_seq,
-      required this.checkdate,
+      this.place_seq,
+      this.checkdate,
       required this.content,
       required this.duedate,
-      required this.duetime,
-      required this.memo,
-      required this.image,
-      required this.customorder,
-      required this.mark,
-      required this.initdate
+      this.duetime,
+      this.memo,
+      this.image,
+      this.customorder,
+      this.mark,
+      this.initdate
     }
   );
 
