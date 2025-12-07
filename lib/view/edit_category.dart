@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:project1_todolist/model/categorys.dart';
-import 'package:project1_todolist/view/my_snackbar.dart';
+import 'package:project1_todolist/util/my_snackbar.dart';
 import 'package:project1_todolist/vm/database_handler.dart';
 
 class EditCategory extends StatefulWidget {
@@ -91,7 +91,7 @@ class _EditCategoryState extends State<EditCategory> {
                             padding: const EdgeInsets.all(8.0),
                             child: ReorderableDragStartListener(
                               index: index,
-                              child: Icon(Icons.menu)
+                              child: Icon(Icons.drag_handle)
                             ),
                           )
                         ),

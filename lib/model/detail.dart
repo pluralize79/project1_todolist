@@ -1,17 +1,17 @@
 class Detail {
   int? seq;
   int work_seq;
-  int checked;
+  int? checked;
   String content;
-  int customorder;
+  int? customorder;
 
   Detail(
     {
       this.seq,
       required this.work_seq,
-      required this.checked,
+      this.checked,
       required this.content,
-      required this.customorder
+      this.customorder
     }
   );
 

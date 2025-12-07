@@ -9,8 +9,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:latlong2/latlong.dart';
 import 'package:project1_todolist/model/categorys.dart';
+import 'package:project1_todolist/model/detail.dart';
+import 'package:project1_todolist/model/place.dart';
 import 'package:project1_todolist/model/work.dart';
-import 'package:project1_todolist/view/my_snackbar.dart';
+import 'package:project1_todolist/util/my_snackbar.dart';
 import 'package:project1_todolist/vm/database_handler.dart';
 
 /* 
@@ -48,6 +50,8 @@ class _AddWorkState extends State<AddWork> {
   final ImagePicker picker = ImagePicker();
   late bool isPicExist;
 
+  late int selectedrepeat;
+
   late bool isPlaceExist;
   Position? currentPosition;
   double? latData; //latitude
@@ -72,6 +76,8 @@ class _AddWorkState extends State<AddWork> {
     selectedTime = today.toString().substring(11,16);
 
     isPicExist = false;
+
+    selectedrepeat = 0;
     
     isPlaceExist = false;
     mapController = MapController();
@@ -506,29 +512,53 @@ class _AddWorkState extends State<AddWork> {
        getImage = await imageFile1.readAsBytes();
     }
 
-    if(isPlaceExist){ //위치가 선택되었으면 위치 추가
-      
-    }
-
-    if(detailList != []){ //하위 항목이 추가되었으면 하위 항목 추가
-
-    }
-
+    //작업 추가
     var workInsert = Work(
       category_seq: selectedCategorys,  
       content: contentController.text, 
       duedate: selectedDate, 
-      duetime: selectedTime, 
+      duetime: selectedTime,
+      repeat: selectedrepeat, 
       memo: memoController.text, 
       image: getImage, 
     );
-
     int check = await handler.addWork(workInsert);
     if(check == 0){
       MySnackbar.error('오류', '작업 추가 중 오류가 발생했습니다.');
     }else{
       Get.back();
     }
+
+    if(isPlaceExist){ //위치가 선택되었으면 위치 추가
+      Place place = Place(
+        work_seq: check,
+        lat: latData!, 
+        lng: longData!, 
+        name: nameController.text
+      );
+      int result = await handler.addPlace(place);
+      if(result == 0){
+        MySnackbar.error('오류', '위치 삽입 중 오류가 발생했습니다.');
+      }
+    }    
+
+    if(detailList != []){ //하위 항목이 추가되었으면 하위 항목 추가
+      List<Detail> details = [];
+      for(String data in detailList){
+        Detail detail = Detail(
+          work_seq: check,  
+          content: data, 
+        );
+        details.add(detail);
+      }
+      int result = await handler.addDetail(details);
+      if (result == 0 && detailList.isNotEmpty){
+        MySnackbar.error('오류', '하위 항목 삽입 중 오류가 발생했습니다.');
+      }
+    }
+
   }
+
+  
 
 } // class

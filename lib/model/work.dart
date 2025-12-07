@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 class Work {
   int? seq;
   int category_seq;
-  int? place_seq;
   String? checkdate;
   String content;
   String duedate;
   String? duetime;
+  int repeat;
   String? memo;
   Uint8List? image;
   int? customorder;
@@ -19,11 +19,11 @@ class Work {
     {
       this.seq,
       required this.category_seq,
-      this.place_seq,
       this.checkdate,
       required this.content,
       required this.duedate,
       this.duetime,
+      required this.repeat,
       this.memo,
       this.image,
       this.customorder,
@@ -35,11 +35,11 @@ class Work {
   Work.fromMap(Map<String, dynamic> res)
   : seq = res['seq'],
     category_seq = res['category_seq'],
-    place_seq = res['place_seq'],
     checkdate = res['checkdate'],
     content = res['content'],
     duedate = res['duedate'],
     duetime = res['duetime'],
+    repeat = res['repeat'],
     memo = res['memo'],
     image = res['image'],
     customorder = res['customorder'],
