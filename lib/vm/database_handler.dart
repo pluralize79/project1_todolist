@@ -12,6 +12,9 @@ class DatabaseHandler {
     String path = await getDatabasesPath();
     return openDatabase(
       join(path, 'todolist.db'),
+      onConfigure: (db) async { //매 연결마다 외래키 활성화
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
       onCreate: (db, version) async{
         await db.execute(
           """
@@ -333,6 +336,30 @@ class DatabaseHandler {
       [work.category_seq, work.content, work.duedate, work.duetime, work.repeat, work.memo, work.image, work.seq]
     );
     return result;
+  }
+
+  //작업 체크
+  Future<void> workCheck(int seq, bool isChecked) async{
+    final Database db = await initializeDB();
+    if (isChecked){
+      await db.rawUpdate(
+        """
+        update work
+        set checkdate = date('now')
+        where seq = ?
+        """,
+        [seq]
+      );
+    }else{
+      await db.rawUpdate(
+        """
+        update work
+        set checkdate = null
+        where seq = ?
+        """,
+        [seq]
+      );
+    }
   }  
 
   //위치 추가

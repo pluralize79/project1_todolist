@@ -28,14 +28,14 @@ class ListWork extends StatefulWidget {
 class _ListWorkState extends State<ListWork> with SingleTickerProviderStateMixin{
   late DatabaseHandler handler;
   late int selectedCategorys;
+  late Map<int, bool> checkList;
 
   @override
   void initState() {
     super.initState();
     handler = DatabaseHandler();
     selectedCategorys = 0;
-
-    loadPageData();
+    checkList ={};
   }
 
   //페이지 기본 데이터 받아오기
@@ -52,6 +52,14 @@ class _ListWorkState extends State<ListWork> with SingleTickerProviderStateMixin
     //리스트 데이터 받기
     final categories = await handler.listCategorys();
     final works = await handler.listWork(selectedCategorys);
+
+    for(Work data in works){
+      if(data.checkdate == null){
+        checkList[data.seq!] = false; 
+      }else{ 
+        checkList[data.seq!] = true;
+      }
+    }
 
     return (
       categories: categories,
@@ -164,6 +172,15 @@ class _ListWorkState extends State<ListWork> with SingleTickerProviderStateMixin
                                     height: 50,
                                     child: Stack(
                                       children: [
+                                        Checkbox( //체크 박스
+                                          value: checkList[works[index].seq], 
+                                          onChanged: (value) async{
+                                            bool isChecked = checkList[works[index].seq]!;
+                                            checkList[works[index].seq!] = !isChecked;
+                                            await handler.workCheck(works[index].seq!, !isChecked);
+                                            setState(() {});
+                                          },
+                                        ),
                                         Center(
                                           child: Text(
                                             works[index].content 
